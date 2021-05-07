@@ -1,7 +1,7 @@
 <template>
-  <div id="App">
+  <div id="App" :class="typeof weather.main != 'undefined' && weather.main.temp > 20 ? 'warm' : ''">
     <main>
-      <div class="seach-box">
+      <div class="search-box">
         <input 
         type="text " 
         class="search-bar" 
@@ -13,11 +13,11 @@
       <div class="weather-wrap" v-if="typeof weather.main != 'undefined'">
         <div class="location-box">
           <div class="location">{{ weather.name}}, {{weather.sys.country}}</div>
-          <div class="date">Friday 7 May 2021</div>
+          <div class="date">{{ dateBuilder() }}</div>
         </div>
         <div class="weather-box">
-          <div class="temp">22	&ordm;C</div>
-          <div class="weather">Rain</div>
+          <div class="temp">{{ Math.round(weather.main.temp) }}	&ordm;C</div>
+          <div class="weather">{{ weather.weather[0].description }} </div>
         </div>
       </div>
     </main>
@@ -31,21 +31,32 @@ export default {
   data () {
     return {
       api_key: '534ec6ce8d1ecee22750acea98ad469a',
-      url_base: 'api.openweathermap.org/data/2.5/',
+      url_base: 'https://api.openweathermap.org/data/2.5/',
       query: '',
       weather: {}
     }
   },
   methods: {
-    fethcWeather (e) {
-        console.log(e.key)
-        fetch(`${this.url_base}weather?q=${this.query}&units=metric&APPID=${this.api_key}`)
-        .then(res => {
-          return res.json();
+    fethcWeather () {
+        fetch(`${this.url_base}weather?q=${this.query}&units=metric&&lang=ru&APPID=${this.api_key}`)
+          .then(res => {
+            return res.json();
         }).then(this.setResults);
     },
     setResults (results) {
       this.weather = results;
+    },
+    dateBuilder() {
+      let dateNow = new Date();
+      let months = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"];
+      let days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
+
+      let day = days[dateNow.getDay()];
+      let date = dateNow.getDay();
+      let mounth = months[dateNow.getMonth()];
+      let year = dateNow.getFullYear();
+
+      return `${day} ${date} ${mounth} ${year}`
     }
   }
 }
@@ -70,6 +81,10 @@ body{
   transition: .4s;
 }
 
+#App.warm{
+  background-image: url('./assets/warm-bg.jpg')
+}
+
 main {
   min-height: 100vh;
   padding: 25px;
@@ -77,12 +92,12 @@ main {
 background-image: linear-gradient(to bottom, rgba(0,0,0, 0.25), rgba(0,0,0, 0.75));
 }
 
-.seach-box {
+.search-box {
   width: 100%;
   margin-bottom: 30px;
 }
 
-.seach-box .search-bar {
+.search-box .search-bar {
   display: block;
   width: 100%;
   padding:15px;
@@ -101,7 +116,7 @@ box-shadow: 0 0 16px rgba(0,0,0, 0.25);
 
 }
 
-.seach-box .search-bar:focus{
+.search-box .search-bar:focus{
   box-shadow:rgba(0,0,0, 0.25);
   background-color: rgba(255, 255, 255, .75);
   border-radius: 16px 0 16px 0;
